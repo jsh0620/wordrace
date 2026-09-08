@@ -1,8 +1,30 @@
-// 자동 감지가 실패했을 때만 보여주는 수동 선택 폴백 목록 (국가명/국기는 아래에서 동적으로 생성)
-const FALLBACK_CODES = [
-  'KR','US','JP','CN','GB','DE','FR','CA','AU','BR','IN','RU','ES','IT','MX','ID',
-  'VN','TH','PH','TR','NL','SE','PL','AR','EG','SA','ZA','NG','PK','BD','IL','SG',
-  'MY','NZ','UA'
+// 국가 선택 화면에 전 세계 모든 나라가 나오도록 쓰는 ISO 3166-1 alpha-2 국가 코드 전체 목록
+const ALL_COUNTRY_CODES = [
+  'AD','AE','AF','AG','AI','AL','AM','AO','AQ','AR','AS','AT','AU','AW','AX','AZ',
+  'BA','BB','BD','BE','BF','BG','BH','BI','BJ','BL','BM','BN','BO','BQ','BR','BS','BT','BV','BW','BY','BZ',
+  'CA','CC','CD','CF','CG','CH','CI','CK','CL','CM','CN','CO','CR','CU','CV','CW','CX','CY','CZ',
+  'DE','DJ','DK','DM','DO','DZ',
+  'EC','EE','EG','EH','ER','ES','ET',
+  'FI','FJ','FK','FM','FO','FR',
+  'GA','GB','GD','GE','GF','GG','GH','GI','GL','GM','GN','GP','GQ','GR','GS','GT','GU','GW','GY',
+  'HK','HM','HN','HR','HT','HU',
+  'ID','IE','IL','IM','IN','IO','IQ','IR','IS','IT',
+  'JE','JM','JO','JP',
+  'KE','KG','KH','KI','KM','KN','KP','KR','KW','KY','KZ',
+  'LA','LB','LC','LI','LK','LR','LS','LT','LU','LV','LY',
+  'MA','MC','MD','ME','MF','MG','MH','MK','ML','MM','MN','MO','MP','MQ','MR','MS','MT','MU','MV','MW','MX','MY','MZ',
+  'NA','NC','NE','NF','NG','NI','NL','NO','NP','NR','NU','NZ',
+  'OM',
+  'PA','PE','PF','PG','PH','PK','PL','PM','PN','PR','PS','PT','PW','PY',
+  'QA',
+  'RE','RO','RS','RU','RW',
+  'SA','SB','SC','SD','SE','SG','SH','SI','SJ','SK','SL','SM','SN','SO','SR','SS','ST','SV','SX','SY','SZ',
+  'TC','TD','TF','TG','TH','TJ','TK','TL','TM','TN','TO','TR','TT','TV','TW','TZ',
+  'UA','UG','UM','US','UY','UZ',
+  'VA','VC','VE','VG','VI','VN','VU',
+  'WF','WS',
+  'YE','YT',
+  'ZA','ZM','ZW',
 ];
 
 const regionNames = (typeof Intl !== 'undefined' && Intl.DisplayNames)
@@ -18,10 +40,12 @@ function countryName(code) {
   }
 }
 
-function flagEmoji(code) {
-  if (!code || code.length !== 2) return '🏳️';
-  const chars = [...code.toUpperCase()].map((c) => 0x1F1E6 - 65 + c.charCodeAt(0));
-  return String.fromCodePoint(...chars);
+// 국기 이모지는 OS/브라우저에 따라 (특히 Windows에서) 국가 코드 글자로 보일 수 있어,
+// flagcdn.com 국기 이미지를 대신 사용해 어디서나 국기 아이콘이 나오도록 한다
+function flagImg(code, size) {
+  const cls = size === 'big' ? 'wr-flag-img wr-flag-img-big' : 'wr-flag-img';
+  const c = (code || '').toLowerCase();
+  return `<img class="${cls}" src="https://flagcdn.com/24x18/${c}.png" srcset="https://flagcdn.com/48x36/${c}.png 2x" width="24" height="18" alt="${code}" loading="lazy" onerror="this.remove()">`;
 }
 
 async function detectCountryByIP() {
@@ -144,7 +168,7 @@ function renderCountryBadge() {
   if (!el.countryBadge) return;
   if (countryCode) {
     el.countryBadge.hidden = false;
-    el.countryBadge.textContent = `${flagEmoji(countryCode)} ${countryName(countryCode)}`;
+    el.countryBadge.innerHTML = `${flagImg(countryCode)} ${countryName(countryCode)}`;
     el.countryBadge.title = 'IP 기반으로 자동 감지된 국가예요 (변경 불가)';
   } else {
     el.countryBadge.hidden = true;
@@ -194,7 +218,7 @@ function renderLeaderboard() {
       if (code === countryCode) li.classList.add('wr-lb-mine');
       li.innerHTML = `
         <span class="wr-lb-rank">${idx + 1}</span>
-        <span class="wr-lb-name">${flagEmoji(code)} ${countryName(code)}</span>
+        <span class="wr-lb-name">${flagImg(code)} ${countryName(code)}</span>
         <span class="wr-lb-score">${score.toLocaleString()}</span>
       `;
       el.leaderboardList.appendChild(li);
@@ -218,7 +242,7 @@ function renderMyCountryRow(entries) {
     <p class="wr-lb-mine-label">내 국가 순위</p>
     <div class="wr-lb-row wr-lb-mine">
       <span class="wr-lb-rank">${rank}</span>
-      <span class="wr-lb-name">${flagEmoji(countryCode)} ${countryName(countryCode)}</span>
+      <span class="wr-lb-name">${flagImg(countryCode)} ${countryName(countryCode)}</span>
       <span class="wr-lb-score">${score.toLocaleString()}</span>
     </div>
   `;
@@ -226,10 +250,11 @@ function renderMyCountryRow(entries) {
 
 function renderCountryGrid() {
   el.countryGrid.innerHTML = '';
-  FALLBACK_CODES.forEach((code) => {
+  const codes = [...ALL_COUNTRY_CODES].sort((a, b) => countryName(a).localeCompare(countryName(b), 'ko'));
+  codes.forEach((code) => {
     const btn = document.createElement('button');
     btn.className = 'wr-country-btn';
-    btn.innerHTML = `<span class="wr-flag-big">${flagEmoji(code)}</span><span>${countryName(code)}</span>`;
+    btn.innerHTML = `${flagImg(code, 'big')}<span>${countryName(code)}</span>`;
     btn.addEventListener('click', () => chooseCountry(code));
     el.countryGrid.appendChild(btn);
   });

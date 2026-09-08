@@ -52,6 +52,7 @@ html, body {
   margin-right: auto;
 }
 .wr-brand { font-weight: 900; font-size: 20px; display: flex; align-items: center; gap: 8px; }
+.wr-country-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; }
 .wr-header-right { display: flex; align-items: center; gap: 8px; }
 .wr-country-pill, .wr-theme-toggle {
   background: var(--panel);
@@ -210,7 +211,17 @@ html, body {
   font-size: 12px;
 }
 .wr-country-btn:hover { border-color: var(--accent); }
-.wr-flag-big { font-size: 26px; }
+
+.wr-flag-img {
+  display: inline-block;
+  vertical-align: middle;
+  width: 20px;
+  height: 15px;
+  object-fit: cover;
+  border-radius: 3px;
+  border: 1px solid var(--border);
+}
+.wr-flag-img-big { width: 32px; height: 24px; border-radius: 4px; }
 
 @media (max-width: 900px) {
   .wr-main { display: flex; flex-direction: column; gap: 20px; min-height: 0; }
