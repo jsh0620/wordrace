@@ -102,6 +102,7 @@ const el = {
   wordDisplay: document.getElementById('word-display'),
   input: document.getElementById('word-input'),
   leaderboardList: document.getElementById('leaderboard-list'),
+  myCountryWrap: document.getElementById('my-country-wrap'),
   pickerOverlay: document.getElementById('picker-overlay'),
   pickerTitle: document.getElementById('picker-title'),
   pickerDesc: document.getElementById('picker-desc'),
@@ -114,13 +115,6 @@ function pickWord(exclude) {
     w = WORDS[Math.floor(Math.random() * WORDS.length)];
   } while (w === exclude && WORDS.length > 1);
   return w;
-}
-
-function medal(idx) {
-  if (idx === 0) return '🥇';
-  if (idx === 1) return '🥈';
-  if (idx === 2) return '🥉';
-  return String(idx + 1);
 }
 
 function loadProfile() {
@@ -186,7 +180,6 @@ function flashWord(cls) {
 
 function renderLeaderboard() {
   const entries = Object.entries(leaderboard).sort((a, b) => b[1] - a[1]);
-  const maxScore = entries.length ? entries[0][1] : 0;
   el.leaderboardList.innerHTML = '';
 
   if (entries.length === 0) {
@@ -194,22 +187,41 @@ function renderLeaderboard() {
     li.className = 'wr-lb-empty';
     li.textContent = '아직 기록이 없어요. 첫 기록을 남겨보세요!';
     el.leaderboardList.appendChild(li);
-    return;
+  } else {
+    entries.slice(0, 10).forEach(([code, score], idx) => {
+      const li = document.createElement('li');
+      li.className = 'wr-lb-row';
+      if (code === countryCode) li.classList.add('wr-lb-mine');
+      li.innerHTML = `
+        <span class="wr-lb-rank">${idx + 1}</span>
+        <span class="wr-lb-name">${flagEmoji(code)} ${countryName(code)}</span>
+        <span class="wr-lb-score">${score.toLocaleString()}</span>
+      `;
+      el.leaderboardList.appendChild(li);
+    });
   }
 
-  entries.forEach(([code, score], idx) => {
-    const pct = maxScore ? (score / maxScore) * 100 : 0;
-    const li = document.createElement('li');
-    if (code === countryCode) li.classList.add('wr-lb-mine');
-    li.innerHTML = `
-      <span class="wr-lb-rank">${medal(idx)}</span>
-      <span>${flagEmoji(code)}</span>
-      <span class="wr-lb-name">${countryName(code)}</span>
-      <div class="wr-lb-bar-track"><div class="wr-lb-bar" style="width:${pct}%"></div></div>
+  renderMyCountryRow(entries);
+}
+
+function renderMyCountryRow(entries) {
+  if (!el.myCountryWrap) return;
+  if (!countryCode) {
+    el.myCountryWrap.hidden = true;
+    return;
+  }
+  const idx = entries.findIndex(([code]) => code === countryCode);
+  const rank = idx >= 0 ? idx + 1 : '-';
+  const score = idx >= 0 ? entries[idx][1] : 0;
+  el.myCountryWrap.hidden = false;
+  el.myCountryWrap.innerHTML = `
+    <p class="wr-lb-mine-label">내 국가 순위</p>
+    <div class="wr-lb-row wr-lb-mine">
+      <span class="wr-lb-rank">${rank}</span>
+      <span class="wr-lb-name">${flagEmoji(countryCode)} ${countryName(countryCode)}</span>
       <span class="wr-lb-score">${score.toLocaleString()}</span>
-    `;
-    el.leaderboardList.appendChild(li);
-  });
+    </div>
+  `;
 }
 
 function renderCountryGrid() {
@@ -303,7 +315,7 @@ function handleInput(e) {
 
 async function init() {
   loadProfile();
-  renderTheme('dark');
+  renderTheme('light');
   renderCountryBadge();
   renderCountryGrid();
   el.input.placeholder = '단어 목록 불러오는 중...';

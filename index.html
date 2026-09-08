@@ -6,11 +6,11 @@
 <title>wordrace</title>
 <meta name="description" content="랜덤 영단어를 맞게 입력해 내 국가의 누적 점수를 올리는 전 세계 타자 대결 사이트" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;700;900&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="wr-app" id="app" data-theme="dark">
+  <div class="wr-app" id="app" data-theme="light">
     <header class="wr-header">
       <div class="wr-brand">wordrace</div>
       <div class="wr-header-right">
@@ -20,13 +20,15 @@
     </header>
 
     <main class="wr-main">
+      <aside class="wr-leaderboard">
+        <h2>국가별 랭킹</h2>
+        <p class="wr-lb-note">전 세계 참가자의 점수가 국가별로 합산돼요 (모두에게 공개, 실시간 갱신).</p>
+        <ol class="wr-lb-list" id="leaderboard-list"></ol>
+        <div class="wr-lb-mine-section" id="my-country-wrap" hidden></div>
+      </aside>
+
       <section class="wr-arena">
-        <div class="wr-stats-row">
-          <div class="wr-stat">
-            <span class="wr-stat-label">score</span>
-            <span class="wr-stat-value" id="stat-score">0</span>
-          </div>
-        </div>
+        <div class="wr-score-display" id="stat-score">0</div>
 
         <div class="wr-word-display" id="word-display"></div>
 
@@ -41,12 +43,6 @@
         />
 
         <p class="wr-hint">단어를 정확히 입력하면 자동으로 다음 단어로 넘어가고, 내 국가의 누적 점수가 1점 올라가요.</p>
-      </section>
-
-      <section class="wr-leaderboard">
-        <h2>국가별 랭킹</h2>
-        <p class="wr-lb-note">전 세계 참가자의 점수가 국가별로 합산돼요 (모두에게 공개, 실시간 갱신).</p>
-        <ol class="wr-lb-list" id="leaderboard-list"></ol>
       </section>
     </main>
 
