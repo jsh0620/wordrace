@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>타자 월드컵 — 국가별 타자 대결</title>
+<meta name="description" content="랜덤 영단어를 맞게 입력해 내 국가의 누적 점수를 올리는 전 세계 타자 대결 사이트" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="wr-app" id="app" data-theme="dark">
+    <header class="wr-header">
+      <div class="wr-brand">🌍 타자 월드컵</div>
+      <div class="wr-header-right">
+        <button class="wr-country-pill" id="country-pill" hidden></button>
+        <button class="wr-theme-toggle" id="theme-toggle" aria-label="테마 전환">🌙</button>
+      </div>
+    </header>
+
+    <main class="wr-main">
+      <section class="wr-arena">
+        <div class="wr-stats-row">
+          <div class="wr-stat">
+            <span class="wr-stat-label">내 점수</span>
+            <span class="wr-stat-value" id="stat-score">0</span>
+          </div>
+          <div class="wr-stat">
+            <span class="wr-stat-label">연속 정답</span>
+            <span class="wr-stat-value" id="stat-streak">🔥 0</span>
+          </div>
+          <div class="wr-stat">
+            <span class="wr-stat-label">최고 연속</span>
+            <span class="wr-stat-value" id="stat-best">0</span>
+          </div>
+        </div>
+
+        <div class="wr-word-display" id="word-display"></div>
+
+        <input
+          class="wr-input"
+          id="word-input"
+          placeholder="여기에 입력하세요"
+          autocapitalize="off"
+          autocorrect="off"
+          spellcheck="false"
+          disabled
+        />
+
+        <p class="wr-hint">단어를 정확히 입력하면 자동으로 다음 단어로 넘어가고, 내 국가의 누적 점수가 1점 올라가요.</p>
+      </section>
+
+      <section class="wr-leaderboard">
+        <h2>국가별 랭킹</h2>
+        <p class="wr-lb-note">전 세계 참가자의 점수가 국가별로 합산돼요 (모두에게 공개, 실시간 갱신).</p>
+        <ol class="wr-lb-list" id="leaderboard-list"></ol>
+      </section>
+    </main>
+
+    <div class="wr-modal-overlay" id="picker-overlay">
+      <div class="wr-modal">
+        <h2>참가할 국가를 선택하세요</h2>
+        <p>선택한 국가에 내 점수가 누적돼요. 국가별 랭킹은 모든 방문자에게 공개돼요.</p>
+        <div class="wr-country-grid" id="country-grid"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
