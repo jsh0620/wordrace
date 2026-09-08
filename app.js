@@ -1,59 +1,85 @@
-const COUNTRIES = [
-  { code: 'KR', name: '대한민국', flag: '🇰🇷' },
-  { code: 'US', name: '미국', flag: '🇺🇸' },
-  { code: 'JP', name: '일본', flag: '🇯🇵' },
-  { code: 'CN', name: '중국', flag: '🇨🇳' },
-  { code: 'GB', name: '영국', flag: '🇬🇧' },
-  { code: 'DE', name: '독일', flag: '🇩🇪' },
-  { code: 'FR', name: '프랑스', flag: '🇫🇷' },
-  { code: 'CA', name: '캐나다', flag: '🇨🇦' },
-  { code: 'AU', name: '호주', flag: '🇦🇺' },
-  { code: 'BR', name: '브라질', flag: '🇧🇷' },
-  { code: 'IN', name: '인도', flag: '🇮🇳' },
-  { code: 'RU', name: '러시아', flag: '🇷🇺' },
-  { code: 'ES', name: '스페인', flag: '🇪🇸' },
-  { code: 'IT', name: '이탈리아', flag: '🇮🇹' },
-  { code: 'MX', name: '멕시코', flag: '🇲🇽' },
-  { code: 'ID', name: '인도네시아', flag: '🇮🇩' },
-  { code: 'VN', name: '베트남', flag: '🇻🇳' },
-  { code: 'TH', name: '태국', flag: '🇹🇭' },
-  { code: 'PH', name: '필리핀', flag: '🇵🇭' },
-  { code: 'TR', name: '튀르키예', flag: '🇹🇷' },
-  { code: 'NL', name: '네덜란드', flag: '🇳🇱' },
-  { code: 'SE', name: '스웨덴', flag: '🇸🇪' },
-  { code: 'PL', name: '폴란드', flag: '🇵🇱' },
-  { code: 'AR', name: '아르헨티나', flag: '🇦🇷' },
-  { code: 'EG', name: '이집트', flag: '🇪🇬' },
-  { code: 'SA', name: '사우디아라비아', flag: '🇸🇦' },
-  { code: 'ZA', name: '남아프리카공화국', flag: '🇿🇦' },
-  { code: 'NG', name: '나이지리아', flag: '🇳🇬' },
-  { code: 'PK', name: '파키스탄', flag: '🇵🇰' },
-  { code: 'BD', name: '방글라데시', flag: '🇧🇩' },
-  { code: 'IL', name: '이스라엘', flag: '🇮🇱' },
-  { code: 'SG', name: '싱가포르', flag: '🇸🇬' },
-  { code: 'MY', name: '말레이시아', flag: '🇲🇾' },
-  { code: 'NZ', name: '뉴질랜드', flag: '🇳🇿' },
-  { code: 'UA', name: '우크라이나', flag: '🇺🇦' },
+// 자동 감지가 실패했을 때만 보여주는 수동 선택 폴백 목록 (국가명/국기는 아래에서 동적으로 생성)
+const FALLBACK_CODES = [
+  'KR','US','JP','CN','GB','DE','FR','CA','AU','BR','IN','RU','ES','IT','MX','ID',
+  'VN','TH','PH','TR','NL','SE','PL','AR','EG','SA','ZA','NG','PK','BD','IL','SG',
+  'MY','NZ','UA'
 ];
 
-const WORDS = [
+const regionNames = (typeof Intl !== 'undefined' && Intl.DisplayNames)
+  ? new Intl.DisplayNames(['ko'], { type: 'region' })
+  : null;
+
+function countryName(code) {
+  if (!code) return code;
+  try {
+    return (regionNames && regionNames.of(code.toUpperCase())) || code;
+  } catch (e) {
+    return code;
+  }
+}
+
+function flagEmoji(code) {
+  if (!code || code.length !== 2) return '🏳️';
+  const chars = [...code.toUpperCase()].map((c) => 0x1F1E6 - 65 + c.charCodeAt(0));
+  return String.fromCodePoint(...chars);
+}
+
+async function detectCountryByIP() {
+  try {
+    const res = await fetch('https://ipwho.is/');
+    const data = await res.json();
+    if (data && data.success !== false && data.country_code) {
+      return data.country_code.toUpperCase();
+    }
+  } catch (e) {
+    // 네트워크 오류 등 — 폴백으로 넘어감
+  }
+  return null;
+}
+
+// 네트워크에서 불러오지 못했을 때만 쓰는 최소한의 예비 단어 목록
+const FALLBACK_WORDS = [
   'apple','orange','banana','purple','yellow','silver','bridge','castle','forest','desert',
   'winter','summer','autumn','spring','planet','rocket','engine','harbor','island','valley',
   'canyon','tunnel','signal','camera','pencil','pillow','blanket','window','mirror','ladder',
   'basket','bottle','candle','feather','marble','ribbon','shadow','shelter','thunder','whisper',
-  'anchor','ballet','breeze','bubble','ceiling','circuit','compass','crystal','diamond','dragon',
-  'echo','engine','falcon','galaxy','garden','glacier','horizon','journey','jungle','kingdom',
-  'lantern','legend','lighthouse','magnet','meadow','mission','monster','morning','mountain','mystery',
-  'network','ocean','orbit','oxygen','palace','panther','parade','pattern','phoenix','pirate',
-  'pocket','poetry','portal','power','puzzle','python','quartz','quiver','rabbit','random',
-  'rescue','ripple','river','rustle','saddle','safari','sailor','sample','sapphire','satellite',
-  'scatter','scholar','season','secret','shelter','shield','shimmer','shuttle','silence','sketch',
-  'skyline','slogan','smoke','snake','sneaker','solar','spider','spiral','sprout','square',
-  'stable','statue','stream','stripe','sunset','sunrise','swift','symbol','system','temple',
-  'tiger','timber','tissue','torch','tower','tractor','trailer','trumpet','turtle','twilight',
-  'umbrella','uniform','valley','vapor','velvet','venture','vessel','victory','village','violin',
-  'vortex','voyage','wander','warrior','weather','whistle','willow','wizard','wonder','zebra','zephyr'
 ];
+
+// 구글 Trillion Word Corpus 기반 영단어 빈도 목록 (욕설 제거판, 정적 파일, CORS 허용)
+const WORD_LIST_URL = 'https://raw.githubusercontent.com/first20hours/google-10000-english/master/google-10000-english-no-swears.txt';
+const WORD_LIST_CACHE_KEY = 'wr-word-list-cache-v1';
+
+let WORDS = FALLBACK_WORDS;
+
+async function loadWordList() {
+  try {
+    const cached = localStorage.getItem(WORD_LIST_CACHE_KEY);
+    if (cached) {
+      const arr = JSON.parse(cached);
+      if (Array.isArray(arr) && arr.length > 50) {
+        WORDS = arr;
+        return;
+      }
+    }
+  } catch (e) { /* ignore */ }
+
+  try {
+    const res = await fetch(WORD_LIST_URL);
+    const text = await res.text();
+    const words = text
+      .split('\n')
+      .map((w) => w.trim().toLowerCase())
+      .filter((w) => /^[a-z]{3,9}$/.test(w));
+    if (words.length > 50) {
+      WORDS = words;
+      try {
+        localStorage.setItem(WORD_LIST_CACHE_KEY, JSON.stringify(words));
+      } catch (e) { /* 저장 공간 부족 등은 무시 */ }
+    }
+  } catch (e) {
+    // 네트워크 실패 시 FALLBACK_WORDS를 계속 사용
+  }
+}
 
 const LOCAL_KEY = 'wr-player-profile';
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -62,14 +88,14 @@ let countryCode = null;
 let personalScore = 0;
 let streak = 0;
 let bestStreak = 0;
-let currentWord = pickWord();
+let currentWord = null;
 let typed = '';
 let leaderboard = {};
 
 const el = {
   app: document.getElementById('app'),
   themeToggle: document.getElementById('theme-toggle'),
-  countryPill: document.getElementById('country-pill'),
+  countryBadge: document.getElementById('country-badge'),
   statScore: document.getElementById('stat-score'),
   statStreak: document.getElementById('stat-streak'),
   statBest: document.getElementById('stat-best'),
@@ -77,6 +103,8 @@ const el = {
   input: document.getElementById('word-input'),
   leaderboardList: document.getElementById('leaderboard-list'),
   pickerOverlay: document.getElementById('picker-overlay'),
+  pickerTitle: document.getElementById('picker-title'),
+  pickerDesc: document.getElementById('picker-desc'),
   countryGrid: document.getElementById('country-grid'),
 };
 
@@ -118,20 +146,21 @@ function renderTheme(theme) {
   el.themeToggle.textContent = theme === 'dark' ? '☀️' : '🌙';
 }
 
-function renderCountryPill() {
-  const c = COUNTRIES.find((x) => x.code === countryCode);
-  if (c) {
-    el.countryPill.hidden = false;
-    el.countryPill.textContent = `${c.flag} ${c.name} · 변경`;
+function renderCountryBadge() {
+  if (!el.countryBadge) return;
+  if (countryCode) {
+    el.countryBadge.hidden = false;
+    el.countryBadge.textContent = `${flagEmoji(countryCode)} ${countryName(countryCode)}`;
+    el.countryBadge.title = 'IP 기반으로 자동 감지된 국가예요 (변경 불가)';
   } else {
-    el.countryPill.hidden = true;
+    el.countryBadge.hidden = true;
   }
 }
 
 function renderStats() {
   el.statScore.textContent = personalScore.toLocaleString();
-  el.statStreak.textContent = `🔥 ${streak}`;
-  el.statBest.textContent = bestStreak.toLocaleString();
+  if (el.statStreak) el.statStreak.textContent = `🔥 ${streak}`;
+  if (el.statBest) el.statBest.textContent = bestStreak.toLocaleString();
 }
 
 function renderWord() {
@@ -169,14 +198,13 @@ function renderLeaderboard() {
   }
 
   entries.forEach(([code, score], idx) => {
-    const c = COUNTRIES.find((x) => x.code === code);
     const pct = maxScore ? (score / maxScore) * 100 : 0;
     const li = document.createElement('li');
     if (code === countryCode) li.classList.add('wr-lb-mine');
     li.innerHTML = `
       <span class="wr-lb-rank">${medal(idx)}</span>
-      <span>${c ? c.flag : '🏳️'}</span>
-      <span class="wr-lb-name">${c ? c.name : code}</span>
+      <span>${flagEmoji(code)}</span>
+      <span class="wr-lb-name">${countryName(code)}</span>
       <div class="wr-lb-bar-track"><div class="wr-lb-bar" style="width:${pct}%"></div></div>
       <span class="wr-lb-score">${score.toLocaleString()}</span>
     `;
@@ -186,16 +214,16 @@ function renderLeaderboard() {
 
 function renderCountryGrid() {
   el.countryGrid.innerHTML = '';
-  COUNTRIES.forEach((c) => {
+  FALLBACK_CODES.forEach((code) => {
     const btn = document.createElement('button');
     btn.className = 'wr-country-btn';
-    btn.innerHTML = `<span class="wr-flag-big">${c.flag}</span><span>${c.name}</span>`;
-    btn.addEventListener('click', () => chooseCountry(c.code));
+    btn.innerHTML = `<span class="wr-flag-big">${flagEmoji(code)}</span><span>${countryName(code)}</span>`;
+    btn.addEventListener('click', () => chooseCountry(code));
     el.countryGrid.appendChild(btn);
   });
 }
 
-function showPicker() {
+function showFallbackPicker() {
   el.pickerOverlay.classList.add('wr-visible');
   el.input.disabled = true;
 }
@@ -209,7 +237,7 @@ function hidePicker() {
 function chooseCountry(code) {
   countryCode = code;
   saveProfile();
-  renderCountryPill();
+  renderCountryBadge();
   renderLeaderboard();
   hidePicker();
 }
@@ -273,29 +301,46 @@ function handleInput(e) {
   }
 }
 
-function init() {
+async function init() {
   loadProfile();
   renderTheme('dark');
-  renderCountryPill();
-  renderStats();
-  renderWord();
+  renderCountryBadge();
   renderCountryGrid();
+  el.input.placeholder = '단어 목록 불러오는 중...';
 
   el.input.addEventListener('input', handleInput);
   el.themeToggle.addEventListener('click', () => {
     renderTheme(el.app.dataset.theme === 'dark' ? 'light' : 'dark');
   });
-  el.countryPill.addEventListener('click', showPicker);
-
-  if (!countryCode) {
-    showPicker();
-  } else {
-    el.input.disabled = false;
-    el.input.focus();
-  }
 
   fetchLeaderboard();
   subscribeRealtime();
+
+  const tasks = [loadWordList()];
+  if (!countryCode) {
+    tasks.push(
+      detectCountryByIP().then((detected) => {
+        if (detected) {
+          countryCode = detected;
+          saveProfile();
+          renderCountryBadge();
+        }
+      })
+    );
+  }
+  await Promise.all(tasks);
+
+  currentWord = pickWord();
+  renderStats();
+  renderWord();
+  el.input.placeholder = '여기에 입력하세요';
+
+  if (countryCode) {
+    el.input.disabled = false;
+    el.input.focus();
+  } else {
+    showFallbackPicker();
+  }
 }
 
 init();
