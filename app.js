@@ -82,7 +82,7 @@ async function loadWordList() {
 }
 
 const LOCAL_KEY = 'wr-player-profile';
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let countryCode = null;
 let personalScore = 0;
@@ -255,7 +255,7 @@ function chooseCountry(code) {
 }
 
 async function fetchLeaderboard() {
-  const { data, error } = await supabase.from('country_scores').select('*');
+  const { data, error } = await supabaseClient.from('country_scores').select('*');
   if (error) {
     console.error('리더보드를 불러오지 못했습니다:', error);
     return;
@@ -266,12 +266,12 @@ async function fetchLeaderboard() {
 }
 
 async function bumpGlobalScore(code) {
-  const { error } = await supabase.rpc('increment_country_score', { p_country_code: code });
+  const { error } = await supabaseClient.rpc('increment_country_score', { p_country_code: code });
   if (error) console.error('점수 반영 실패:', error);
 }
 
 function subscribeRealtime() {
-  supabase
+  supabaseClient
     .channel('country-scores-changes')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'country_scores' }, () => {
       fetchLeaderboard();
