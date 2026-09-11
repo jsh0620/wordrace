@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>wordrace</title>
-<meta name="description" content="랜덤 영단어를 맞게 입력해 내 국가의 누적 점수를 올리는 전 세계 타자 대결 사이트" />
+<meta name="description" content="Type random English words to score points for your country in a real-time global typing race." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;700;900&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;700;900&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -15,14 +15,13 @@
       <div class="wr-brand">wordrace</div>
       <div class="wr-header-right">
         <span class="wr-country-badge" id="country-badge" hidden></span>
-        <button class="wr-theme-toggle" id="theme-toggle" aria-label="테마 전환">🌙</button>
+        <button class="wr-theme-toggle" id="theme-toggle" aria-label="Toggle theme">🌙</button>
       </div>
     </header>
 
     <main class="wr-main">
       <aside class="wr-leaderboard">
-        <h2>국가별 랭킹</h2>
-        <p class="wr-lb-note">전 세계 참가자의 점수가 국가별로 합산돼요 (모두에게 공개, 실시간 갱신).</p>
+        <h2>Ranking</h2>
         <ol class="wr-lb-list" id="leaderboard-list"></ol>
         <div class="wr-lb-mine-section" id="my-country-wrap" hidden></div>
       </aside>
@@ -35,21 +34,17 @@
         <input
           class="wr-input"
           id="word-input"
-          placeholder="여기에 입력하세요"
           autocapitalize="off"
           autocorrect="off"
           spellcheck="false"
           disabled
         />
-
-        <p class="wr-hint">단어를 정확히 입력하면 자동으로 다음 단어로 넘어가고, 내 국가의 누적 점수가 1점 올라가요.</p>
       </section>
     </main>
 
     <div class="wr-modal-overlay" id="picker-overlay">
       <div class="wr-modal">
-        <h2 id="picker-title">국가를 확인하지 못했어요</h2>
-        <p id="picker-desc">자동으로 위치를 감지하지 못해 국가를 직접 선택해야 해요. 한 번 선택하면 이후에는 변경할 수 없어요.</p>
+        <h2 id="picker-title">Select your country</h2>
         <div class="wr-country-grid" id="country-grid"></div>
       </div>
     </div>

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://wordrace-blue.vercel.app/sitemap.xml

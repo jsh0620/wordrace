@@ -28,7 +28,7 @@ const ALL_COUNTRY_CODES = [
 ];
 
 const regionNames = (typeof Intl !== 'undefined' && Intl.DisplayNames)
-  ? new Intl.DisplayNames(['ko'], { type: 'region' })
+  ? new Intl.DisplayNames(['en'], { type: 'region' })
   : null;
 
 function countryName(code) {
@@ -169,7 +169,7 @@ function renderCountryBadge() {
   if (countryCode) {
     el.countryBadge.hidden = false;
     el.countryBadge.innerHTML = `${flagImg(countryCode)} ${countryName(countryCode)}`;
-    el.countryBadge.title = 'IP 기반으로 자동 감지된 국가예요 (변경 불가)';
+    el.countryBadge.title = 'Auto-detected by IP';
   } else {
     el.countryBadge.hidden = true;
   }
@@ -209,7 +209,7 @@ function renderLeaderboard() {
   if (entries.length === 0) {
     const li = document.createElement('li');
     li.className = 'wr-lb-empty';
-    li.textContent = '아직 기록이 없어요. 첫 기록을 남겨보세요!';
+    li.textContent = 'No scores yet';
     el.leaderboardList.appendChild(li);
   } else {
     entries.slice(0, 10).forEach(([code, score], idx) => {
@@ -239,7 +239,7 @@ function renderMyCountryRow(entries) {
   const score = idx >= 0 ? entries[idx][1] : 0;
   el.myCountryWrap.hidden = false;
   el.myCountryWrap.innerHTML = `
-    <p class="wr-lb-mine-label">내 국가 순위</p>
+    <p class="wr-lb-mine-label">Your country</p>
     <div class="wr-lb-row wr-lb-mine">
       <span class="wr-lb-rank">${rank}</span>
       <span class="wr-lb-name">${flagImg(countryCode)} ${countryName(countryCode)}</span>
@@ -250,7 +250,7 @@ function renderMyCountryRow(entries) {
 
 function renderCountryGrid() {
   el.countryGrid.innerHTML = '';
-  const codes = [...ALL_COUNTRY_CODES].sort((a, b) => countryName(a).localeCompare(countryName(b), 'ko'));
+  const codes = [...ALL_COUNTRY_CODES].sort((a, b) => countryName(a).localeCompare(countryName(b), 'en'));
   codes.forEach((code) => {
     const btn = document.createElement('button');
     btn.className = 'wr-country-btn';
@@ -282,7 +282,7 @@ function chooseCountry(code) {
 async function fetchLeaderboard() {
   const { data, error } = await supabaseClient.from('country_scores').select('*');
   if (error) {
-    console.error('리더보드를 불러오지 못했습니다:', error);
+    console.error('Failed to load leaderboard:', error);
     return;
   }
   leaderboard = {};
@@ -292,7 +292,7 @@ async function fetchLeaderboard() {
 
 async function bumpGlobalScore(code) {
   const { error } = await supabaseClient.rpc('increment_country_score', { p_country_code: code });
-  if (error) console.error('점수 반영 실패:', error);
+  if (error) console.error('Failed to update score:', error);
 }
 
 function subscribeRealtime() {
@@ -343,7 +343,7 @@ async function init() {
   renderTheme('light');
   renderCountryBadge();
   renderCountryGrid();
-  el.input.placeholder = '단어 목록 불러오는 중...';
+  el.input.placeholder = 'Loading...';
 
   el.input.addEventListener('input', handleInput);
   el.themeToggle.addEventListener('click', () => {
@@ -370,7 +370,7 @@ async function init() {
   currentWord = pickWord();
   renderStats();
   renderWord();
-  el.input.placeholder = '여기에 입력하세요';
+  el.input.placeholder = '';
 
   if (countryCode) {
     el.input.disabled = false;
